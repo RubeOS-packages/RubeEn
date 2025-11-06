@@ -5,6 +5,7 @@ import { FileInput } from './FileInput';
 import { PasswordInput } from './PasswordInput';
 import { ActionButton } from './ActionButton';
 import { StatusMessage } from './StatusMessage';
+import { ClipboardIcon, CheckIcon } from './Icons';
 
 export const Decryptor: React.FC = () => {
   const [opFile, setOpFile] = useState<File | null>(null);
@@ -13,6 +14,7 @@ export const Decryptor: React.FC = () => {
   const [status, setStatus] = useState<{ type: 'error' | 'success' | 'info'; message: string } | null>({type: 'info', message: 'Select your .op file and its corresponding .key.json file.'});
   const [isLoading, setIsLoading] = useState(false);
   const [decryptedText, setDecryptedText] = useState('');
+  const [isCopied, setIsCopied] = useState(false);
 
   const handleOpFileChange = (selectedFile: File | null) => {
     if (selectedFile && !selectedFile.name.endsWith('.op')) {
@@ -23,6 +25,7 @@ export const Decryptor: React.FC = () => {
     setOpFile(selectedFile);
     setDecryptedText('');
     setStatus(null);
+    setIsCopied(false);
   };
 
   const handleKeyFileChange = (selectedFile: File | null) => {
@@ -34,6 +37,7 @@ export const Decryptor: React.FC = () => {
     setKeyFile(selectedFile);
     setDecryptedText('');
     setStatus(null);
+    setIsCopied(false);
   };
 
   const handleDecrypt = useCallback(async () => {
@@ -44,6 +48,7 @@ export const Decryptor: React.FC = () => {
 
     setIsLoading(true);
     setDecryptedText('');
+    setIsCopied(false);
     setStatus({ type: 'info', message: 'Decrypting key and file... Please wait.' });
     
     try {
@@ -75,6 +80,18 @@ export const Decryptor: React.FC = () => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  const handleCopy = async () => {
+    if (!decryptedText || isCopied) return;
+    try {
+      await navigator.clipboard.writeText(decryptedText);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2500); // Reset after 2.5 seconds
+    } catch (err) {
+      setStatus({ type: 'error', message: 'Failed to copy text to clipboard.' });
+      console.error('Failed to copy:', err);
+    }
   };
 
 
@@ -115,9 +132,19 @@ export const Decryptor: React.FC = () => {
                 className="w-full h-48 p-3 bg-primary border border-border-color rounded-md text-text-primary focus:ring-2 focus:ring-accent focus:outline-none"
                 placeholder="Decrypted content will appear here"
             />
-            <ActionButton onClick={handleDownload}>
-                Download Decrypted .txt
-            </ActionButton>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <ActionButton onClick={handleDownload}>
+                    Download Decrypted .txt
+                </ActionButton>
+                <button
+                  onClick={handleCopy}
+                  disabled={isCopied}
+                  className="w-full flex items-center justify-center p-3 bg-border-color text-text-primary text-base font-bold rounded-md transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-secondary focus:ring-accent disabled:opacity-75 disabled:cursor-not-allowed"
+                >
+                  {isCopied ? <CheckIcon /> : <ClipboardIcon />}
+                  {isCopied ? 'Copied!' : 'Copy to Clipboard'}
+                </button>
+            </div>
         </div>
       )}
     </div>
