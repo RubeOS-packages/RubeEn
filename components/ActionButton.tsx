@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { LoadingSpinner } from './Icons';
+import { LoadingSpinner } from './Icons.tsx';
 
 interface ActionButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   isLoading?: boolean;

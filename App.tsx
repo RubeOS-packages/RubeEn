@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
-import { Encryptor } from './components/Encryptor';
-import { Decryptor } from './components/Decryptor';
-import { LockIcon, UnlockIcon } from './components/Icons';
-import { OperationMode } from './types';
+import { Encryptor } from './components/Encryptor.tsx';
+import { Decryptor } from './components/Decryptor.tsx';
+import { LockIcon, UnlockIcon } from './components/Icons.tsx';
+import { OperationMode } from './types.ts';
 
 const App: React.FC = () => {
   const [mode, setMode] = useState<OperationMode>(OperationMode.ENCRYPT);

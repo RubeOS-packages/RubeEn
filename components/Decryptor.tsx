@@ -1,10 +1,10 @@
 import React, { useState, useCallback } from 'react';
-import { importAndDecryptKey, decryptFile, DecryptionResult } from '../services/cryptoService';
-import { FileInput } from './FileInput';
-import { PasswordInput } from './PasswordInput';
-import { ActionButton } from './ActionButton';
-import { StatusMessage } from './StatusMessage';
-import { ClipboardIcon, CheckIcon } from './Icons';
+import { importAndDecryptKey, decryptFile, DecryptionResult } from '../services/cryptoService.ts';
+import { FileInput } from './FileInput.tsx';
+import { PasswordInput } from './PasswordInput.tsx';
+import { ActionButton } from './ActionButton.tsx';
+import { StatusMessage } from './StatusMessage.tsx';
+import { ClipboardIcon, CheckIcon } from './Icons.tsx';
 
 interface DecryptionInfo {
     metadata: DecryptionResult['metadata'];

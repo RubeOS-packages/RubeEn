@@ -1,6 +1,5 @@
-
 import React, { useRef, useState } from 'react';
-import { UploadIcon } from './Icons';
+import { UploadIcon } from './Icons.tsx';
 
 interface FileInputProps {
   label: string;
