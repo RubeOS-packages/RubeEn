@@ -1,47 +1,58 @@
 
 import React, { useState, useCallback } from 'react';
-import { decryptFile } from '../services/cryptoService';
+import { importAndDecryptKey, decryptFile } from '../services/cryptoService';
 import { FileInput } from './FileInput';
 import { PasswordInput } from './PasswordInput';
 import { ActionButton } from './ActionButton';
 import { StatusMessage } from './StatusMessage';
 
 export const Decryptor: React.FC = () => {
-  const [file, setFile] = useState<File | null>(null);
+  const [opFile, setOpFile] = useState<File | null>(null);
+  const [keyFile, setKeyFile] = useState<File | null>(null);
   const [password, setPassword] = useState('');
-  const [status, setStatus] = useState<{ type: 'error' | 'success' | 'info'; message: string } | null>({type: 'info', message: 'Select a .op file to decrypt.'});
+  const [status, setStatus] = useState<{ type: 'error' | 'success' | 'info'; message: string } | null>({type: 'info', message: 'Select your .op file and its corresponding .key.json file.'});
   const [isLoading, setIsLoading] = useState(false);
   const [decryptedText, setDecryptedText] = useState('');
 
-  const handleFileChange = (selectedFile: File | null) => {
+  const handleOpFileChange = (selectedFile: File | null) => {
     if (selectedFile && !selectedFile.name.endsWith('.op')) {
         setStatus({ type: 'error', message: 'Invalid file type. Please select a .op file.' });
-        setFile(null);
+        setOpFile(null);
         return;
     }
-    setFile(selectedFile);
+    setOpFile(selectedFile);
+    setDecryptedText('');
+    setStatus(null);
+  };
+
+  const handleKeyFileChange = (selectedFile: File | null) => {
+    if (selectedFile && !selectedFile.name.endsWith('.key.json')) {
+        setStatus({ type: 'error', message: 'Invalid file type. Please select a .key.json file.' });
+        setKeyFile(null);
+        return;
+    }
+    setKeyFile(selectedFile);
     setDecryptedText('');
     setStatus(null);
   };
 
   const handleDecrypt = useCallback(async () => {
-    if (!file || !password) {
-      setStatus({ type: 'error', message: 'Please select a file and enter a password.' });
+    if (!opFile || !keyFile || !password) {
+      setStatus({ type: 'error', message: 'Please select both files and enter the password.' });
       return;
     }
 
     setIsLoading(true);
     setDecryptedText('');
-    setStatus({ type: 'info', message: 'Decrypting file... Please wait.' });
+    setStatus({ type: 'info', message: 'Decrypting key and file... Please wait.' });
+    
+    try {
+        const opFileContent = await opFile.arrayBuffer();
+        const keyFileContent = await keyFile.text();
 
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      try {
-        if (!event.target?.result) {
-            throw new Error("Failed to read file.");
-        }
-        const content = event.target.result as ArrayBuffer;
-        const decryptedContent = await decryptFile(content, password);
+        const fileKey = await importAndDecryptKey(keyFileContent, password);
+        const decryptedContent = await decryptFile(opFileContent, fileKey);
+        
         const text = new TextDecoder().decode(decryptedContent);
         setDecryptedText(text);
         setStatus({ type: 'success', message: 'File decrypted successfully!' });
@@ -51,19 +62,13 @@ export const Decryptor: React.FC = () => {
       } finally {
         setIsLoading(false);
       }
-    };
-    reader.onerror = () => {
-        setStatus({type: 'error', message: 'Error reading file.'});
-        setIsLoading(false);
-    };
-    reader.readAsArrayBuffer(file);
-  }, [file, password]);
+  }, [opFile, keyFile, password]);
 
   const handleDownload = () => {
     const blob = new Blob([decryptedText], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    const originalFilename = file?.name.replace(/\.op$/, '');
+    const originalFilename = opFile?.name.replace(/\.op$/, '');
     a.href = url;
     a.download = `${originalFilename}_decrypted.txt`;
     document.body.appendChild(a);
@@ -75,20 +80,27 @@ export const Decryptor: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <FileInput
-        onFileChange={handleFileChange}
-        accept=".op"
-        disabled={isLoading}
-      />
+      <div className="space-y-4 p-4 border border-border-color rounded-lg">
+        <FileInput
+          onFileChange={handleOpFileChange}
+          accept=".op"
+          disabled={isLoading}
+        />
+        <FileInput
+          onFileChange={handleKeyFileChange}
+          accept=".json"
+          disabled={isLoading}
+        />
+      </div>
       <PasswordInput
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        placeholder="Enter decryption password"
+        placeholder="Enter password for key file"
         disabled={isLoading}
       />
       <ActionButton
         onClick={handleDecrypt}
-        disabled={!file || !password || isLoading}
+        disabled={!opFile || !keyFile || !password || isLoading}
         isLoading={isLoading}
       >
         Decrypt File

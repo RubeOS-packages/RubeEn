@@ -1,5 +1,5 @@
 {
   "name": "RubeEn",
-  "description": "A secure, browser-based tool to encrypt and decrypt text files. Encrypt your .txt files into a secure .op format, and decrypt them back with your password. All operations happen locally in your browser for maximum privacy.",
+  "description": "A secure, browser-based tool to encrypt and decrypt text files. Encrypt your .txt files into a secure .op format, protected by a password-encrypted key file. All operations happen locally in your browser for maximum privacy.",
   "requestFramePermissions": []
 }

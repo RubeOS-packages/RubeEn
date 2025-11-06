@@ -9,7 +9,7 @@ const App: React.FC = () => {
   const [mode, setMode] = useState<OperationMode>(OperationMode.ENCRYPT);
 
   const headerText = "CryptOP File Security";
-  const tagline = "Secure your text files locally in your browser.";
+  const tagline = "Secure your text files with a password-protected key file.";
 
   return (
     <div className="min-h-screen bg-primary flex flex-col items-center justify-center p-4 font-sans">

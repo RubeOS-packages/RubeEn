@@ -1,6 +1,6 @@
 
 import React, { useState, useCallback } from 'react';
-import { encryptFile } from '../services/cryptoService';
+import { generateFileKey, encryptFile, exportEncryptedKey } from '../services/cryptoService';
 import { FileInput } from './FileInput';
 import { PasswordInput } from './PasswordInput';
 import { ActionButton } from './ActionButton';
@@ -9,7 +9,7 @@ import { StatusMessage } from './StatusMessage';
 export const Encryptor: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [password, setPassword] = useState('');
-  const [status, setStatus] = useState<{ type: 'error' | 'success' | 'info'; message: string } | null>({type: 'info', message: 'Select a .txt file to encrypt into a secure .op file.'});
+  const [status, setStatus] = useState<{ type: 'error' | 'success' | 'info'; message: string } | null>({type: 'info', message: 'Select a .txt file and set a password to protect its encryption key.'});
   const [isLoading, setIsLoading] = useState(false);
 
   const handleFileChange = (selectedFile: File | null) => {
@@ -24,12 +24,12 @@ export const Encryptor: React.FC = () => {
   
   const handleEncrypt = useCallback(async () => {
     if (!file || !password) {
-      setStatus({ type: 'error', message: 'Please select a file and enter a password.' });
+      setStatus({ type: 'error', message: 'Please select a file and enter a password to protect the key.' });
       return;
     }
 
     setIsLoading(true);
-    setStatus({ type: 'info', message: 'Encrypting file... Please wait.' });
+    setStatus({ type: 'info', message: 'Generating key and encrypting file... Please wait.' });
 
     const reader = new FileReader();
     reader.onload = async (event) => {
@@ -38,20 +38,41 @@ export const Encryptor: React.FC = () => {
             throw new Error("Failed to read file.");
         }
         const content = event.target.result as ArrayBuffer;
-        const encryptedContent = await encryptFile(content, password);
+
+        const fileKey = await generateFileKey();
+        const encryptedContent = await encryptFile(content, fileKey);
+        const encryptedKeyJson = await exportEncryptedKey(fileKey, password);
         
-        const blob = new Blob([encryptedContent], { type: 'application/octet-stream' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
         const originalFilename = file.name.replace(/\.txt$/, '');
-        a.href = url;
-        a.download = `${originalFilename}.op`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+
+        // Create blob for encrypted file
+        const fileBlob = new Blob([encryptedContent], { type: 'application/octet-stream' });
+        const fileUrl = URL.createObjectURL(fileBlob);
+        const fileLink = document.createElement('a');
+        fileLink.href = fileUrl;
+        fileLink.download = `${originalFilename}.op`;
         
-        setStatus({ type: 'success', message: 'File encrypted and download started successfully!' });
+        // Create blob for key file
+        const keyBlob = new Blob([encryptedKeyJson], { type: 'application/json' });
+        const keyUrl = URL.createObjectURL(keyBlob);
+        const keyLink = document.createElement('a');
+        keyLink.href = keyUrl;
+        keyLink.download = `${originalFilename}.key.json`;
+
+        // Trigger downloads
+        document.body.appendChild(fileLink);
+        fileLink.click();
+        document.body.removeChild(fileLink);
+        URL.revokeObjectURL(fileUrl);
+        
+        await new Promise(res => setTimeout(res, 100)); // Brief delay for browser stability
+
+        document.body.appendChild(keyLink);
+        keyLink.click();
+        document.body.removeChild(keyLink);
+        URL.revokeObjectURL(keyUrl);
+
+        setStatus({ type: 'success', message: 'Success! Your encrypted file and key file are downloading. Keep both files safe!' });
       } catch (error) {
         setStatus({ type: 'error', message: 'Encryption failed. Please try again.' });
         console.error(error);
@@ -77,7 +98,7 @@ export const Encryptor: React.FC = () => {
       <PasswordInput
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        placeholder="Enter encryption password"
+        placeholder="Enter password to protect key file"
         disabled={isLoading}
       />
       <ActionButton
@@ -85,7 +106,7 @@ export const Encryptor: React.FC = () => {
         disabled={!file || !password || isLoading}
         isLoading={isLoading}
       >
-        Encrypt & Download
+        Encrypt & Download Files
       </ActionButton>
       {status && <StatusMessage type={status.type} message={status.message} />}
     </div>
