@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { generateFileKey, encryptFile, exportEncryptedKey } from '../services/cryptoService';
 import { FileInput } from './FileInput';
@@ -9,15 +8,10 @@ import { StatusMessage } from './StatusMessage';
 export const Encryptor: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [password, setPassword] = useState('');
-  const [status, setStatus] = useState<{ type: 'error' | 'success' | 'info'; message: string } | null>({type: 'info', message: 'Select a .txt file and set a password to protect its encryption key.'});
+  const [status, setStatus] = useState<{ type: 'error' | 'success' | 'info'; message: string } | null>({type: 'info', message: 'Select any file and set a password to protect its encryption key.'});
   const [isLoading, setIsLoading] = useState(false);
 
   const handleFileChange = (selectedFile: File | null) => {
-    if (selectedFile && selectedFile.type !== 'text/plain') {
-        setStatus({ type: 'error', message: 'Invalid file type. Please select a .txt file.' });
-        setFile(null);
-        return;
-    }
     setFile(selectedFile);
     setStatus(null);
   };
@@ -41,23 +35,23 @@ export const Encryptor: React.FC = () => {
 
         const fileKey = await generateFileKey();
         const encryptedContent = await encryptFile(content, fileKey);
-        const encryptedKeyJson = await exportEncryptedKey(fileKey, password);
+        const encryptedKeyJson = await exportEncryptedKey(fileKey, password, file.name);
         
-        const originalFilename = file.name.replace(/\.txt$/, '');
+        const baseFilename = file.name.includes('.') ? file.name.substring(0, file.name.lastIndexOf('.')) : file.name;
 
         // Create blob for encrypted file
         const fileBlob = new Blob([encryptedContent], { type: 'application/octet-stream' });
         const fileUrl = URL.createObjectURL(fileBlob);
         const fileLink = document.createElement('a');
         fileLink.href = fileUrl;
-        fileLink.download = `${originalFilename}.op`;
+        fileLink.download = `${baseFilename}.op`;
         
         // Create blob for key file
         const keyBlob = new Blob([encryptedKeyJson], { type: 'application/json' });
         const keyUrl = URL.createObjectURL(keyBlob);
         const keyLink = document.createElement('a');
         keyLink.href = keyUrl;
-        keyLink.download = `${originalFilename}.key.json`;
+        keyLink.download = `${baseFilename}.key.json`;
 
         // Trigger downloads
         document.body.appendChild(fileLink);
@@ -92,9 +86,9 @@ export const Encryptor: React.FC = () => {
     <div className="space-y-6">
       <div className="space-y-4 p-4 border border-border-color rounded-lg">
         <FileInput
-          label="Text File to Encrypt (.txt)"
+          label="File to Encrypt (any type)"
           onFileChange={handleFileChange}
-          accept=".txt"
+          accept="*"
           disabled={isLoading}
         />
         <PasswordInput
