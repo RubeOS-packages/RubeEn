@@ -4,8 +4,8 @@ import { Decryptor } from './components/Decryptor.tsx';
 import { LockIcon, UnlockIcon } from './components/Icons.tsx';
 import { OperationMode } from './types.ts';
 
-const App: React.FC = () => {
-  const [mode, setMode] = useState<OperationMode>(OperationMode.ENCRYPT);
+const App = () => {
+  const [mode, setMode] = useState(OperationMode.ENCRYPT);
 
   const headerText = "RubeEn Fire Security";
   const tagline = "Secure your text files with a password-protected key file.";
@@ -45,14 +45,7 @@ const App: React.FC = () => {
   );
 };
 
-interface TabButtonProps {
-  label: string;
-  icon: React.ReactNode;
-  isActive: boolean;
-  onClick: () => void;
-}
-
-const TabButton: React.FC<TabButtonProps> = ({ label, icon, isActive, onClick }) => (
+const TabButton = ({ label, icon, isActive, onClick }) => (
   <button
     onClick={onClick}
     className={`w-1/2 flex items-center justify-center gap-2 p-4 font-semibold text-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-secondary focus:ring-accent ${

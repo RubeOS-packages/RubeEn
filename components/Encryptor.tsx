@@ -5,13 +5,13 @@ import { PasswordInput } from './PasswordInput.tsx';
 import { ActionButton } from './ActionButton.tsx';
 import { StatusMessage } from './StatusMessage.tsx';
 
-export const Encryptor: React.FC = () => {
-  const [file, setFile] = useState<File | null>(null);
+export const Encryptor = () => {
+  const [file, setFile] = useState(null);
   const [password, setPassword] = useState('');
-  const [status, setStatus] = useState<{ type: 'error' | 'success' | 'info'; message: string } | null>({type: 'info', message: 'Select any file and set a password to protect its encryption key.'});
+  const [status, setStatus] = useState({type: 'info', message: 'Select any file and set a password to protect its encryption key.'});
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleFileChange = (selectedFile: File | null) => {
+  const handleFileChange = (selectedFile) => {
     setFile(selectedFile);
     setStatus(null);
   };
@@ -28,10 +28,11 @@ export const Encryptor: React.FC = () => {
     const reader = new FileReader();
     reader.onload = async (event) => {
       try {
-        if (!event.target?.result) {
-            throw new Error("Failed to read file.");
+        const content = event.target?.result;
+        // FIX: Verify the file content is an ArrayBuffer to satisfy the 'encryptFile' function signature.
+        if (!(content instanceof ArrayBuffer)) {
+            throw new Error("Failed to read file as an ArrayBuffer.");
         }
-        const content = event.target.result as ArrayBuffer;
 
         const fileKey = await generateFileKey();
         const encryptedContent = await encryptFile(content, fileKey);

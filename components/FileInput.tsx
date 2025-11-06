@@ -1,18 +1,11 @@
 import React, { useRef, useState } from 'react';
 import { UploadIcon } from './Icons.tsx';
 
-interface FileInputProps {
-  label: string;
-  onFileChange: (file: File | null) => void;
-  accept: string;
-  disabled: boolean;
-}
+export const FileInput = ({ label, onFileChange, accept, disabled }) => {
+  const [fileName, setFileName] = useState('');
+  const inputRef = useRef(null);
 
-export const FileInput: React.FC<FileInputProps> = ({ label, onFileChange, accept, disabled }) => {
-  const [fileName, setFileName] = useState<string>('');
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (event) => {
     const file = event.target.files?.[0] || null;
     setFileName(file ? file.name : '');
     onFileChange(file);

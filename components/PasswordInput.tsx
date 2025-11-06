@@ -1,9 +1,6 @@
-
 import React, { useState } from 'react';
 
-interface PasswordInputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
-
-export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
+export const PasswordInput = (props) => {
   const [isVisible, setIsVisible] = useState(false);
 
   return (

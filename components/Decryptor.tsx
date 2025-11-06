@@ -1,31 +1,25 @@
 import React, { useState, useCallback } from 'react';
-import { importAndDecryptKey, decryptFile, DecryptionResult } from '../services/cryptoService.ts';
+import { importAndDecryptKey, decryptFile } from '../services/cryptoService.ts';
 import { FileInput } from './FileInput.tsx';
 import { PasswordInput } from './PasswordInput.tsx';
 import { ActionButton } from './ActionButton.tsx';
 import { StatusMessage } from './StatusMessage.tsx';
 import { ClipboardIcon, CheckIcon } from './Icons.tsx';
 
-interface DecryptionInfo {
-    metadata: DecryptionResult['metadata'];
-    decryptedAt: number;
-    decryptedBy: string;
-}
-
-const isTextFile = (filename: string): boolean => {
+const isTextFile = (filename) => {
     const textExtensions = ['.txt', '.md', '.json', '.xml', '.html', '.css', '.js', '.ts', '.py', '.rb', '.java', '.go', '.rs', '.c', '.cpp', '.h', '.hpp', '.sh', '.log'];
     const lowercasedFilename = filename.toLowerCase();
     return textExtensions.some(ext => lowercasedFilename.endsWith(ext));
 };
 
-export const Decryptor: React.FC = () => {
-  const [opFile, setOpFile] = useState<File | null>(null);
-  const [keyFile, setKeyFile] = useState<File | null>(null);
+export const Decryptor = () => {
+  const [opFile, setOpFile] = useState(null);
+  const [keyFile, setKeyFile] = useState(null);
   const [password, setPassword] = useState('');
-  const [status, setStatus] = useState<{ type: 'error' | 'success' | 'info'; message: string } | null>({type: 'info', message: 'Select your .op file and its corresponding .key.json file.'});
+  const [status, setStatus] = useState({type: 'info', message: 'Select your .op file and its corresponding .key.json file.'});
   const [isLoading, setIsLoading] = useState(false);
-  const [decryptedContent, setDecryptedContent] = useState<ArrayBuffer | null>(null);
-  const [decryptionInfo, setDecryptionInfo] = useState<DecryptionInfo | null>(null);
+  const [decryptedContent, setDecryptedContent] = useState(null);
+  const [decryptionInfo, setDecryptionInfo] = useState(null);
   const [decryptedText, setDecryptedText] = useState('');
   const [isCopied, setIsCopied] = useState(false);
 
@@ -37,7 +31,7 @@ export const Decryptor: React.FC = () => {
     setIsCopied(false);
   }
 
-  const handleOpFileChange = (selectedFile: File | null) => {
+  const handleOpFileChange = (selectedFile) => {
     if (selectedFile && !selectedFile.name.endsWith('.op')) {
         setStatus({ type: 'error', message: 'Invalid file type. Please select a .op file.' });
         setOpFile(null);
@@ -47,7 +41,7 @@ export const Decryptor: React.FC = () => {
     resetState();
   };
 
-  const handleKeyFileChange = (selectedFile: File | null) => {
+  const handleKeyFileChange = (selectedFile) => {
     if (selectedFile && !selectedFile.name.endsWith('.key.json')) {
         setStatus({ type: 'error', message: 'Invalid file type. Please select a .key.json file.' });
         setKeyFile(null);
@@ -87,7 +81,7 @@ export const Decryptor: React.FC = () => {
         }
         
         setStatus({ type: 'success', message: 'File decrypted successfully! See details below.' });
-      } catch (error: any) {
+      } catch (error) {
         setStatus({ type: 'error', message: error.message || 'Decryption failed.' });
         console.error(error);
       } finally {
@@ -179,7 +173,8 @@ export const Decryptor: React.FC = () => {
             )}
             
             <div className={`grid grid-cols-1 ${decryptedText ? 'sm:grid-cols-2' : ''} gap-4`}>
-                <ActionButton onClick={handleDownload} className={!decryptedText ? 'col-span-full' : ''}>
+                {/* FIX: The ActionButton component requires the isLoading prop. */}
+                <ActionButton onClick={handleDownload} isLoading={false} className={!decryptedText ? 'col-span-full' : ''}>
                     Download "{decryptionInfo.metadata.filename}"
                 </ActionButton>
                 {decryptedText && (
@@ -199,7 +194,7 @@ export const Decryptor: React.FC = () => {
   );
 };
 
-const InfoItem: React.FC<{ label: string; value: string; fullWidth?: boolean }> = ({ label, value, fullWidth = false }) => (
+const InfoItem = ({ label, value, fullWidth = false }) => (
     <div className={fullWidth ? 'sm:col-span-2' : ''}>
         <p className="font-semibold text-text-secondary">{label}:</p>
         <p className="text-text-primary break-words">{value}</p>

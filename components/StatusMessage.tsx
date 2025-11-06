@@ -1,12 +1,4 @@
-
-import React from 'react';
-
-interface StatusMessageProps {
-  type: 'error' | 'success' | 'info';
-  message: string;
-}
-
-export const StatusMessage: React.FC<StatusMessageProps> = ({ type, message }) => {
+export const StatusMessage = ({ type, message }) => {
   const baseClasses = 'p-4 rounded-md text-sm';
   const typeClasses = {
     error: 'bg-danger/20 text-danger',
