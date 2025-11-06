@@ -8,7 +8,7 @@ import { OperationMode } from './types';
 const App: React.FC = () => {
   const [mode, setMode] = useState<OperationMode>(OperationMode.ENCRYPT);
 
-  const headerText = "CryptOP File Security";
+  const headerText = "RubeEn Fire Security";
   const tagline = "Secure your text files with a password-protected key file.";
 
   return (
@@ -39,7 +39,7 @@ const App: React.FC = () => {
           </div>
         </main>
          <footer className="p-4 bg-primary text-center text-xs text-text-secondary border-t border-border-color">
-            <p>&copy; {new Date().getFullYear()} CryptOP. All operations are performed client-side. No data is ever sent to a server.</p>
+            <p>&copy; {new Date().getFullYear()} RubeEn Fire Security. All operations are performed client-side. No data is ever sent to a server.</p>
         </footer>
       </div>
     </div>

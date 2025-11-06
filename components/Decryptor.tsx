@@ -99,11 +99,13 @@ export const Decryptor: React.FC = () => {
     <div className="space-y-6">
       <div className="space-y-4 p-4 border border-border-color rounded-lg">
         <FileInput
+          label="Encrypted File (.op)"
           onFileChange={handleOpFileChange}
           accept=".op"
           disabled={isLoading}
         />
         <FileInput
+          label="Key File (.key.json)"
           onFileChange={handleKeyFileChange}
           accept=".json"
           disabled={isLoading}

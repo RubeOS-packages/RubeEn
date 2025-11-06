@@ -90,17 +90,20 @@ export const Encryptor: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <FileInput
-        onFileChange={handleFileChange}
-        accept=".txt"
-        disabled={isLoading}
-      />
-      <PasswordInput
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="Enter password to protect key file"
-        disabled={isLoading}
-      />
+      <div className="space-y-4 p-4 border border-border-color rounded-lg">
+        <FileInput
+          label="Text File to Encrypt (.txt)"
+          onFileChange={handleFileChange}
+          accept=".txt"
+          disabled={isLoading}
+        />
+        <PasswordInput
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Enter password to protect key file"
+          disabled={isLoading}
+        />
+      </div>
       <ActionButton
         onClick={handleEncrypt}
         disabled={!file || !password || isLoading}

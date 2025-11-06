@@ -3,12 +3,13 @@ import React, { useRef, useState } from 'react';
 import { UploadIcon } from './Icons';
 
 interface FileInputProps {
+  label: string;
   onFileChange: (file: File | null) => void;
   accept: string;
   disabled: boolean;
 }
 
-export const FileInput: React.FC<FileInputProps> = ({ onFileChange, accept, disabled }) => {
+export const FileInput: React.FC<FileInputProps> = ({ label, onFileChange, accept, disabled }) => {
   const [fileName, setFileName] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -25,7 +26,7 @@ export const FileInput: React.FC<FileInputProps> = ({ onFileChange, accept, disa
   return (
     <div>
       <label className="block text-sm font-medium text-text-secondary mb-2">
-        {fileName ? 'Selected File' : 'Select File'}
+        {label}
       </label>
       <div
         onClick={handleLabelClick}
